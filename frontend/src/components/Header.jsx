@@ -5,6 +5,7 @@ import Search from './Search';
 import { FaRegCircleUser } from "react-icons/fa6";
 import useMobile from '../hooks/usemobile';
 import { BsCart4 } from "react-icons/bs";
+import AdminPanel from '../pages/AdminPanel';
 
 const Header = () => {
   const [isMobile] = useMobile()
@@ -18,6 +19,9 @@ const Header = () => {
   }
  const gotomycart=()=>{
   navigate('/cart')
+ }
+ const redirectToAdminPage=()=>{
+  navigate('/admin')
  }
 
   return (
@@ -50,8 +54,10 @@ const Header = () => {
             <div className='hidden lg:block'>
               <Search />
             </div>
-
-
+            <div className='hidden lg:block'>
+            <button onClick={redirectToAdminPage} className='text-lg px-2'>Admin</button>
+            </div>
+          
             {/* Login and My Cart */}
             <div className=''>
               {/**user icons display in only mobile version**/}

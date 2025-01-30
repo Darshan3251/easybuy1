@@ -1,14 +1,18 @@
-const express = require('express'); 
+const app = require('./app');
+const mongoose = require('mongoose');
 
-const app = express(); 
+// MongoDB connection
+mongoose
+  .connect('mongodb+srv://admin:admin3251@cluster0.ilzkl.mongodb.net/products', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }) 
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.error('MongoDB connection error:', err));
 
-const PORT = 5000; 
+const PORT = 5000;
 
-// Define a simple route
-app.get('/', (req, res) => {
-  res.send('Backend run successfully');
-});
 
 app.listen(PORT, () => {
-  console.log(`Backend is running on ${PORT} PORT`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
