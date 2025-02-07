@@ -1,53 +1,53 @@
-import React from 'react';
-import Rice from '../assets/subcat/Rice.webp';
-import Wheat from '../assets/subcat/BabyFood.webp'; // Example for additional products
-import Cookies from '../assets/subcat/Cookies.webp'
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
 const Subcategory_1 = ({ handleAddToCart }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    // Fetch products from backend API
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/products');
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data);
+        } else {
+          console.error('Failed to fetch products');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+  
 
   const productDetails = (id) => {
     navigate(`/productDetails/${id}`);
     
   };
-  const products = [
-    {
-      id: 1,  
-      name: 'Aashirvaad Rice',
-      price: 587,
-      weight: '5 kg',
-      image: Rice,
-    },
-    {
-      id: 2,
-      name: 'Shakti Bhog Wheat',
-      price: 345,
-      weight: '5 kg',
-      image: Wheat,
-    }, {
-      id: 3,
-      name: 'Cookies',
-      price: 400,
-      weight: '500 g',
-      image: Cookies,
-    },
-    // Add more products as needed
-  ];
+
+
 
   return (
     <div className="relative flex items-center">
       <div className="flex gap-4 md:gap-6 lg:gap-8 container mx-auto px-4 overflow-x-scroll scrollbar-none scroll-smooth">
         {products.map((product) => (
           <div
-            onClick={()=>productDetails(product.id)}
-            key={product.id}
+            key={product._id}
+            onClick={() => productDetails(product._id)}
             className="border py-2 lg:p-4 grid gap-2 lg:gap-2 min-w-[9rem] lg:min-w-[13rem] rounded-lg cursor-pointer bg-white shadow-sm hover:shadow-md transition-shadow duration-200"
           >
             {/* Image Section */}
             <div className="min-h-20 w-full max-h-24 lg:max-h-32 rounded-lg overflow-hidden">
-              <img src={product.image} className="w-full h-full object-scale-down lg:scale-125" alt={product.name} />
+              <img
+                src={product.image?.length > 0 ? product.image[0] : 'https://via.placeholder.com/150'}
+                alt={product.name}
+                className="w-full h-full object-scale-down lg:scale-125"
+              />
             </div>
 
             {/* Discount and Timing */}
@@ -62,7 +62,7 @@ const Subcategory_1 = ({ handleAddToCart }) => {
             </div>
 
             {/* Weight */}
-            <div className="px-2 lg:px-2 text-sm lg:text-base text-gray-600">{product.weight}</div>
+            <div className="px-2 lg:px-2 text-sm lg:text-base text-gray-600">{product.netWeight}</div>
 
             {/* Price */}
             <div className="px-2 lg:px-2 gap:6 flex items-center justify-between text-sm lg:text-base">
@@ -72,11 +72,11 @@ const Subcategory_1 = ({ handleAddToCart }) => {
               <div className="w-full flex justify-center">
                 <button
                   className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded-lg text-sm lg:text-base"
-                  onClick={() => handleAddToCart()}
+                  onClick={handleAddToCart}
                 >
                   Add
                 </button>
-              </div>
+              </div>  
             </div>
           </div>
         ))}

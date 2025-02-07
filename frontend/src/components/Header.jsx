@@ -5,30 +5,33 @@ import Search from './Search';
 import { FaRegCircleUser } from "react-icons/fa6";
 import useMobile from '../hooks/usemobile';
 import { BsCart4 } from "react-icons/bs";
+import { useCart } from '../components/CartContaxt'; // Import useCart
 import AdminPanel from '../pages/AdminPanel';
 
 const Header = () => {
-  const [isMobile] = useMobile()
-  const location = useLocation()
-  const isSearchPage = location.pathname === '/search'
+  const [isMobile] = useMobile();
+  const location = useLocation();
+  const isSearchPage = location.pathname === '/search';
   const navigate = useNavigate();
+  const { getCartCount } = useCart(); // Get the cart count
+  const cartCount = getCartCount(); // Call function to get the value
 
+  const redirectToLoginPage = () => {
+    navigate("/login");
+  };
 
-  const   redirectToLoginPage = () => {
-    navigate("/login")
-  }
- const gotomycart=()=>{
-  navigate('/cart')
- }
- const redirectToAdminPage=()=>{
-  navigate('/admin')
- }
+  const gotomycart = () => {
+    navigate('/cart');
+  };
+
+  const redirectToAdminPage = () => {
+    navigate('/admin');
+  };
 
   return (
     <header className='h-24 lg:h-20 lg:shadow-md sticky top-0 z-40 flex flex-col justify-center gap-1 bg-white'>
       {
         !(isSearchPage && isMobile) && (
-
           <div className="container mx-auto flex items-center px-2 justify-between">
             {/* Logo */}
             <div className='h-full'>
@@ -55,9 +58,9 @@ const Header = () => {
               <Search />
             </div>
             <div className='hidden lg:block'>
-            <button onClick={redirectToAdminPage} className='text-lg px-2'>Admin</button>
+              <button onClick={redirectToAdminPage} className='text-lg px-2'>Admin</button>
             </div>
-          
+
             {/* Login and My Cart */}
             <div className=''>
               {/**user icons display in only mobile version**/}
@@ -65,29 +68,31 @@ const Header = () => {
                 <FaRegCircleUser size={26} />
               </button>
               {/**Desktop**/}
-              <div className='hidden lg:flex  items-center gap-10'>
+              <div className='block lg:flex items-center gap-10'>
                 <button onClick={redirectToLoginPage} className='text-lg px-2'>Login</button>
-                <button onClick={gotomycart} className='flex items-center gap-2 bg-green-800 hover:bg-green-700 px-3 py-2 rounded text-white'>
-                  {/**add to card icons */}
+                <button onClick={gotomycart} className='relative flex items-center gap-2 bg-green-800 hover:bg-green-700 px-3 py-2 rounded text-white'>
+                  {/** Add to cart icon */}
                   <div className='animate-bounce'>
                     <BsCart4 size={26} />
                   </div>
                   <div className='font-semibold'>
                     <p>My Cart</p>
                   </div>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2">
+                      {cartCount}
+                    </span>
+                  )}
                 </button>
               </div>
             </div>
           </div>
-
         )
       }
-
 
       <div className='container mx-auto px-2 lg:hidden'>
         <Search />
       </div>
-
     </header>
   );
 };

@@ -1,55 +1,59 @@
-import React, { useState } from 'react';
-import fetchProducts from '../Admin/ProductList'
+import React, { useState, useRef } from 'react';
 
 const AddProductForm = ({ fetchProducts }) => {
   const [name, setName] = useState('');
-  const [categories, setCategory] = useState('');
+  const [categories, setCategories] = useState('');
   const [description, setDescription] = useState('');
+  const [netWeight, setNetWeight] = useState('');
   const [price, setPrice] = useState('');
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]); // Correcting this to 'images' for clarity
+  const fileInputRef = useRef(null);
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImages((prevImages) => [...prevImages, ...files]); // Use functional update to handle state correctly
+  };
+
+  const handleRemoveImage = (index) => {
+    setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-
-    // Convert the image file to a Base64 string
-    const toBase64 = (file) =>
-      new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = (error) => reject(error);
-      });
 
     try {
-      const imageBase64 = image ? await toBase64(image) : null;
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('categories', categories);
+      formData.append('description', description);
+      formData.append('netWeight', netWeight);
+      formData.append('price', price);
 
-      const productData = {
-        name,
-        categories: categories,
-        description,
-        price,
-        image: imageBase64, // Include the Base64-encoded image
-      };
-
+      // Append multiple images
+      images.forEach((file) => {
+        formData.append("image", file); // Make sure it's "image" and not "images"
+      });
       const response = await fetch('http://localhost:5000/api/products', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json', // Set the content type to JSON
-        },
-        body: JSON.stringify(productData), // Send JSON data
+        body: formData,
       });
 
       if (response.ok) {
         alert('Product added successfully!');
         fetchProducts(); // Refresh product list
+
+        // Reset the form
         setName('');
-        setCategory('');
+        setCategories('');
         setDescription('');
+        setNetWeight('');
         setPrice('');
-        setImage(null);
+        setImages([]);
+        if (fileInputRef.current) fileInputRef.current.value = ''; // Clear file input
       } else {
-        console.error('Failed to add product');
+        const errorMessage = await response.text();
+        console.error('Failed to add product:', errorMessage);
+        alert('Error adding product: ' + errorMessage);
       }
     } catch (error) {
       console.error('Error:', error);
@@ -73,7 +77,17 @@ const AddProductForm = ({ fetchProducts }) => {
         <input
           type="text"
           value={categories}
-          onChange={(e) => setCategory(e.target.value)}
+          onChange={(e) => setCategories(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
+        />
+      </div>
+      <div className="mb-4">
+        <label className="block text-gray-700">Net Weight (unit, ml, gm)</label>
+        <input
+          type="text"
+          value={netWeight}
+          onChange={(e) => setNetWeight(e.target.value)}
           className="w-full p-2 border rounded"
           required
         />
@@ -98,12 +112,35 @@ const AddProductForm = ({ fetchProducts }) => {
         />
       </div>
       <div className="mb-4">
-        <label className="block text-gray-700">Image</label>
+        <label className="block text-gray-700">Images</label>
         <input
           type="file"
-          onChange={(e) => setImage(e.target.files[0])}
+          ref={fileInputRef}
+          accept="image/*"
+          multiple
+          onChange={handleFileChange}
           className="w-full p-2 border rounded"
         />
+        {images.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {images.map((image, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={URL.createObjectURL(image)}
+                  alt={`Preview ${index + 1}`}
+                  className="w-16 h-16 object-cover rounded"
+                />
+                <button
+                  type="button"
+                  className="absolute top-0 right-0 bg-red-500 text-white text-xs px-1 rounded"
+                  onClick={() => handleRemoveImage(index)}
+                >
+                  X
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded">
         Add Product
@@ -113,185 +150,3 @@ const AddProductForm = ({ fetchProducts }) => {
 };
 
 export default AddProductForm;
-
-// import React, { useState } from 'react';
-
-// const AddProductForm = ({ fetchProducts }) => {
-//   const [name, setName] = useState('');
-//   const [categories, setCategory] = useState('');
-//   const [description, setDescription] = useState('');
-//   const [price, setPrice] = useState('');
-//   const [image, setImage] = useState(null);
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-  
-//     const formData = new FormData();
-//     formData.append('name', name);
-//     formData.append('category', categories);
-//     formData.append('description', description);
-//     formData.append('price', price);
-//     formData.append('image', image);
-  
-//     try {
-//       const response = await fetch('http://localhost:5000/api/products', {
-//         method: 'POST',
-//         body: formData,
-//         // Do not set Content-Type header manually when using FormData
-//         // The browser will set it automatically with the correct boundary
-//       });
-  
-//       if (response.ok) {
-//         alert('Product added successfully!');
-//         fetchProducts(); // Refresh product list after adding
-//         setName('');
-//         setCategory('');
-//         setDescription('');
-//         setPrice('');
-//         setImage(null);
-//       } else {
-//         console.error('Failed to add product');
-//       }
-//     } catch (error) {
-//       console.error('Error:', error);
-//     }
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow-md mb-6">
-//       <div className="mb-4">
-//         <label className="block text-gray-700">Product Name</label>
-//         <input
-//           type="text"
-//           value={name}
-//           onChange={(e) => setName(e.target.value)}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-//       </div>
-//       <div className="mb-4">
-//         <label className="block text-gray-700">Category</label>
-//         <input
-//           type="text"
-//           value={categories}
-//           onChange={(e) => setCategory(e.target.value)}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-//       </div>
-//       <div className="mb-4">
-//         <label className="block text-gray-700">Description</label>
-//         <textarea
-//           value={description}
-//           onChange={(e) => setDescription(e.target.value)}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-//       </div>
-//       <div className="mb-4">
-//         <label className="block text-gray-700">Price</label>
-//         <input
-//           type="number"
-//           value={price}
-//           onChange={(e) => setPrice(e.target.value)}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-//       </div>
-//       <div className="mb-4">
-//         <label className="block text-gray-700">Image</label>
-//         <input
-//           type="file"
-//           onChange={(e) => setImage(e.target.files[0])}
-//           className="w-full p-2 border rounded"
-         
-//         />
-//       </div>
-//       <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded">
-//         Add Product
-//       </button>
-//     </form>
-//   );
-// };
-
-// export default AddProductForm;
-
-
-// import React, { useState } from 'react';
-
-// const   AddProductForm = ({ addProduct }) => {
-//   const [name, setName] = useState('');
-//   const [category, setCategory] = useState('');
-//   const [description, setDescription] = useState('');
-//   const [price, setPrice] = useState('');
-//   const [image, setImage] = useState(null);
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     const newProduct = { name, category, description, price, image };
-//     addProduct(newProduct);
-//     setName('');
-//     setCategory('');
-//     setDescription('');
-//     setPrice('');
-//     setImage(null);
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow-md mb-6">
-//       <div className="mb-4">
-//         <label className="block text-gray-700">Product Name</label>
-//         <input
-//           type="text"
-//           value={name}
-//           onChange={(e) => setName(e.target.value)}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-//       </div>
-//       <div className="mb-4">
-//         <label className="block text-gray-700">Category</label>
-//         <input
-//           type="text"
-//           value={category}
-//           onChange={(e) => setCategory(e.target.value)}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-//       </div>
-//       <div className="mb-4">
-//         <label className="block text-gray-700">Description</label>
-//         <textarea
-//           value={description}
-//           onChange={(e) => setDescription(e.target.value)}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-//       </div>
-//       <div className="mb-4">
-//         <label className="block text-gray-700">Price</label>
-//         <input
-//           type="number"
-//           value={price}
-//           onChange={(e) => setPrice(e.target.value)}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-//       </div>
-//       <div className="mb-4">
-//         <label className="block text-gray-700">Image</label>
-//         <input
-//           type="file"
-//           onChange={(e) => setImage(e.target.files[0])}
-//           className="w-full p-2 border rounded"
-//           required
-//         />
-//       </div>
-//       <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded">
-//         Add Product
-//       </button>
-//     </form>
-//   );
-// };
-
-// export default AddProductForm;

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import bread1 from "../assets/productDeatils/bread1.png";
-import bread2 from "../assets/productDeatils/bread2.png";
 
-const ProductImageSlider = () => {
+const ProductImageSlider = ({ images = [] }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const images = [bread1, bread2];
+
+  if (images.length === 0) {
+    return <p className="text-center text-gray-500">No images available</p>;
+  }
 
   const handleThumbnailClick = (index) => {
     setCurrentImageIndex(index);
@@ -26,7 +27,7 @@ const ProductImageSlider = () => {
         {images.map((_, index) => (
           <div
             key={index}
-            className={`w-3 h-3 lg:w-5 lg:h-5 rounded-full ${
+            className={`w-3 h-3 lg:w-5 lg:h-5 rounded-full cursor-pointer ${
               index === currentImageIndex ? "bg-slate-300" : "bg-slate-200"
             }`}
             onClick={() => setCurrentImageIndex(index)}
@@ -40,7 +41,7 @@ const ProductImageSlider = () => {
           <div
             key={index}
             className={`w-20 h-20 cursor-pointer shadow-md ${
-              index === currentImageIndex ? "" : ""
+              index === currentImageIndex ? "ring-2 ring-green-600" : ""
             }`}
             onClick={() => handleThumbnailClick(index)}
           >

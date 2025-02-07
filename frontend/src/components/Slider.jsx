@@ -21,12 +21,10 @@ const Slider = ({ title, items, seeAllLink, renderItem }) => {
       <div className="flex justify-between items-center p-4">
         <h3 className="font-semibold text-lg md:text-xl">{title}</h3>
         {seeAllLink && (
-          <a
-            className="text-green-600 hover:text-green-400"
-            href={seeAllLink}
-          >
-            See All
-          </a>
+         <a className="text-green-600 hover:text-green-400" href="/atta">
+         See All
+       </a>
+       
         )}
       </div>
 

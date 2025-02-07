@@ -13,8 +13,8 @@ const Home = () => {
 
     {
       title: 'Atta, Rice & Dal',
-      items: Array(8).fill(<Subcategory_1 />),
-      seeAllLink: '/snacks-beverages',
+      items: Array(1).fill(<Subcategory_1 />),
+      seeAllLink: '/atta',
       renderItem: (item) => item,
     },
     {

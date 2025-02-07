@@ -7,6 +7,7 @@ import Register from "../pages/Register";
 import Cart from "../pages/Cart";
 import ProductDetails from "../components/ProductDetails";
 import AdminPanel from "../pages/AdminPanel";
+import SeeAll from "../components/SeeAll";
 const router = createBrowserRouter([
     {
         path: '/',
@@ -34,6 +35,12 @@ const router = createBrowserRouter([
             },{
                 path:'/admin',
                 element:<AdminPanel/>
+            },{
+                path:'/cart',
+                element:<Cart/>
+            },{
+                path:'/atta',
+                element:<SeeAll/>
             }
 
         ]
