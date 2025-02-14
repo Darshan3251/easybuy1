@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const RegisterForm = () => {
+    const navigate = useNavigate(); // For redirecting after success
+
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -9,35 +12,55 @@ const RegisterForm = () => {
         confirmPassword: "",
     });
 
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log("Form Submitted:", formData);
-        // Add form submission logic here
-    };
-    const [showPassword, setShowPassword] = useState(false);
     const togglePasswordVisibility = () => {
         setShowPassword((prev) => !prev);
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords do not match!");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await axios.post("http://localhost:5000/api/auth/register", {
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+            });
+
+            console.log("Registration Success:", response.data);
+            alert("Registration successful! Please log in.");
+            navigate("/login"); // Redirect to login page
+        } catch (error) {
+            setError(error.response?.data?.message || "Something went wrong!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
-        <div className="mt-6 flex items-center justify-center ">
+        <div className="mt-6 flex items-center justify-center">
             <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
-                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-                    Register
-                </h2>
+                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
+
+                {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label
-                            htmlFor="name"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Name
-                        </label>
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
                         <input
                             type="text"
                             name="name"
@@ -50,12 +73,7 @@ const RegisterForm = () => {
                         />
                     </div>
                     <div>
-                        <label
-                            htmlFor="email"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Email
-                        </label>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
                         <input
                             type="email"
                             name="email"
@@ -68,12 +86,7 @@ const RegisterForm = () => {
                         />
                     </div>
                     <div>
-                        <label
-                            htmlFor="password"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Password
-                        </label>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
                         <div className="relative">
                             <input
                                 type={showPassword ? "text" : "password"}
@@ -81,7 +94,7 @@ const RegisterForm = () => {
                                 id="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                                 placeholder="Enter your password"
                                 required
                             />
@@ -95,12 +108,7 @@ const RegisterForm = () => {
                         </div>
                     </div>
                     <div>
-                        <label
-                            htmlFor="confirmPassword"
-                            className="block text-sm font-medium text-gray-700"
-                        >
-                            Confirm Password
-                        </label>
+                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
                         <input
                             type="password"
                             name="confirmPassword"
@@ -114,16 +122,15 @@ const RegisterForm = () => {
                     </div>
                     <button
                         type="submit"
+                        disabled={loading}
                         className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300"
                     >
-                        Register
+                        {loading ? "Registering..." : "Register"}
                     </button>
                 </form>
-                <p className="mt-3">
-                    Already have account ? <Link to={"/login"} className='font-semibold text-green-700 hover:text-green-800'>Login</Link>
-                </p>
-            </div>
 
+                <p className="mt-3">Already have an account? <Link to="/login" className="font-semibold text-green-700 hover:text-green-800">Login</Link></p>
+            </div>
         </div>
     );
 };

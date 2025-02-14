@@ -80,3 +80,5 @@ export const useCart = () => {
 };
 
 export default CartProvider;
+
+
